@@ -1,0 +1,45 @@
+workflow: moving-house
+trigger: "moving to {{address}} on {{date}}"
+steps:
+  - id: utilities
+    realm: home
+    action: transfer-utilities
+    params:
+      new_address: "{{address}}"
+      date: "{{date}}"
+
+  - id: pet-logistics
+    realm: pet
+    action: moving-plan
+    params:
+      date: "{{date}}"
+
+  - id: address-update
+    realm: legal
+    action: update-address
+    params:
+      new_address: "{{address}}"
+
+  - id: insurance
+    realm: finance
+    action: update-policies
+    depends_on:
+      - address-update
+
+  - id: vet-transfer
+    realm: pet
+    action: find-new-vet
+    depends_on:
+      - pet-logistics
+    params:
+      near: "{{address}}"
+    approval: required
+
+  - id: checklist
+    action: merge-results
+    depends_on:
+      - utilities
+      - pet-logistics
+      - address-update
+      - insurance
+      - vet-transfer

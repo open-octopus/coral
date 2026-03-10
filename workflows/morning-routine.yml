@@ -1,0 +1,25 @@
+workflow: morning-routine
+trigger: "good morning"
+steps:
+  - id: health-check
+    realm: health
+    action: daily-summary
+
+  - id: calendar
+    realm: work
+    action: today-preview
+
+  - id: pet-status
+    realm: pet
+    action: care-status
+
+  - id: weather
+    action: fetch-weather
+
+  - id: summarize
+    action: merge-results
+    depends_on:
+      - health-check
+      - calendar
+      - pet-status
+      - weather

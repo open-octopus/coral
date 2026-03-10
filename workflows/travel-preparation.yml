@@ -1,0 +1,42 @@
+workflow: travel-preparation
+trigger: "travel to {{destination}} for {{duration}}"
+steps:
+  - id: pet-care
+    realm: pet
+    action: arrange-care
+    params:
+      duration: "{{duration}}"
+
+  - id: budget
+    realm: finance
+    action: estimate-budget
+    params:
+      destination: "{{destination}}"
+      duration: "{{duration}}"
+
+  - id: work-handoff
+    realm: work
+    action: set-out-of-office
+    params:
+      duration: "{{duration}}"
+
+  - id: transport
+    realm: vehicle
+    action: plan-transport
+    depends_on:
+      - budget
+
+  - id: health-check
+    realm: health
+    action: travel-health-check
+    params:
+      destination: "{{destination}}"
+
+  - id: summarize
+    action: merge-results
+    depends_on:
+      - pet-care
+      - budget
+      - work-handoff
+      - transport
+      - health-check
