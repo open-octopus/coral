@@ -72,6 +72,10 @@ When you say *"I'm traveling to Tokyo next week for 5 days"*, coral orchestrates
 
 Each Realm's agents contribute their perspective, and coral merges the results into a unified, actionable plan.
 
+<p align="center">
+  <img src="docs/images/dag-execution-architecture.png" alt="coral DAG Execution Architecture" width="800">
+</p>
+
 ## Planned Design
 
 ### DAG Orchestration
@@ -120,6 +124,10 @@ steps:
 - **Human-in-the-loop** — Critical actions require user confirmation before execution
 - **Failure handling** — Retry, skip, or fallback strategies per step
 - **Resumable** — Pause at approval gates, resume later without re-running completed steps
+
+<p align="center">
+  <img src="docs/images/step-lifecycle.png" alt="Workflow Step Lifecycle" width="800">
+</p>
 
 ## Planned CLI
 
