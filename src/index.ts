@@ -7,6 +7,7 @@
 // Types
 export type {
   ApprovalMode,
+  FailureStrategy,
   StepStatus,
   WorkflowStatus,
   RetryConfig,
@@ -21,6 +22,7 @@ export type {
 
 export {
   isApprovalMode,
+  isFailureStrategy,
   isStepStatus,
   isWorkflowStatus,
   createStepResult,
@@ -62,3 +64,6 @@ export { WorkflowExecutor } from './executor.js';
 
 // Gateway client
 export { GatewayClient } from './gateway-client.js';
+
+// Run store (resume support)
+export { RunStore } from './run-store.js';

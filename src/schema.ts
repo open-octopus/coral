@@ -20,7 +20,12 @@ export const StepDefinitionSchema = z.object({
   approval: z.enum(['required', 'optional']).optional(),
   timeout: z.number().int().positive().optional(),
   retry: RetryConfigSchema.optional(),
-});
+  on_failure: z.enum(['fail', 'skip', 'fallback']).optional(),
+  fallback_action: z.string().min(1).optional(),
+}).refine(
+  (step) => step.on_failure !== 'fallback' || !!step.fallback_action,
+  { message: 'fallback_action is required when on_failure is "fallback"', path: ['fallback_action'] },
+);
 
 /** Schema for the complete workflow definition. */
 export const WorkflowDefinitionSchema = z.object({

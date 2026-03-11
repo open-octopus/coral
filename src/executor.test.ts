@@ -6,14 +6,18 @@ import type {
   StepDefinition,
 } from './types.js';
 
+// Shared mock chat/call fns that tests can reconfigure
+let mockChat = vi.fn().mockResolvedValue('mocked realm response');
+let mockCall = vi.fn().mockResolvedValue({ result: 'mocked utility response' });
+
 // Mock the gateway client so tests don't need a real WebSocket server
 vi.mock('./gateway-client.js', () => {
   return {
     GatewayClient: vi.fn().mockImplementation(() => ({
       connect: vi.fn().mockResolvedValue(undefined),
       disconnect: vi.fn(),
-      chat: vi.fn().mockResolvedValue('mocked realm response'),
-      call: vi.fn().mockResolvedValue({ result: 'mocked utility response' }),
+      get chat() { return mockChat; },
+      get call() { return mockCall; },
       connected: true,
     })),
   };
@@ -35,6 +39,8 @@ describe('WorkflowExecutor', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
+    mockChat = vi.fn().mockResolvedValue('mocked realm response');
+    mockCall = vi.fn().mockResolvedValue({ result: 'mocked utility response' });
     executor = new WorkflowExecutor('ws://localhost:19789');
   });
 
@@ -250,6 +256,97 @@ describe('WorkflowExecutor', () => {
 
       const result = await executor.run(workflow, {}, { dryRun: true });
       expect(result.status).toBe('completed');
+    });
+  });
+
+  describe('failure strategies', () => {
+    it('skips step on failure when on_failure is "skip"', async () => {
+      mockChat = vi.fn()
+        .mockRejectedValueOnce(new Error('service down'))
+        .mockResolvedValue('mocked realm response');
+
+      const skipExecutor = new WorkflowExecutor('ws://localhost:19789');
+
+      const workflow = makeWorkflow([
+        { id: 'fragile', action: 'act', realm: 'r', on_failure: 'skip' },
+        { id: 'after', action: 'act', realm: 'r', depends_on: ['fragile'] },
+      ]);
+
+      const result = await skipExecutor.run(workflow, {});
+
+      const fragileStep = result.steps.get('fragile');
+      expect(fragileStep?.status).toBe('skipped');
+
+      const afterStep = result.steps.get('after');
+      expect(afterStep?.status).toBe('done');
+      expect(result.status).toBe('completed');
+    });
+
+    it('fails workflow by default when step fails', async () => {
+      mockChat = vi.fn().mockRejectedValue(new Error('service down'));
+      mockCall = vi.fn().mockRejectedValue(new Error('service down'));
+
+      const failExecutor = new WorkflowExecutor('ws://localhost:19789');
+
+      const workflow = makeWorkflow([
+        { id: 'fails', action: 'act', realm: 'r' },
+        { id: 'after', action: 'act', depends_on: ['fails'] },
+      ]);
+
+      const result = await failExecutor.run(workflow, {});
+
+      expect(result.steps.get('fails')?.status).toBe('failed');
+      expect(result.status).toBe('failed');
+    });
+
+    it('executes fallback_action when on_failure is "fallback"', async () => {
+      mockChat = vi.fn()
+        .mockRejectedValueOnce(new Error('primary failed'))
+        .mockResolvedValueOnce('fallback response');
+
+      const fbExecutor = new WorkflowExecutor('ws://localhost:19789');
+
+      const workflow = makeWorkflow([
+        {
+          id: 'with-fallback',
+          action: 'primary-act',
+          realm: 'r',
+          on_failure: 'fallback',
+          fallback_action: 'backup-act',
+        },
+      ]);
+
+      const result = await fbExecutor.run(workflow, {});
+
+      const step = result.steps.get('with-fallback');
+      expect(step?.status).toBe('done');
+      expect(step?.result).toBe('fallback response');
+      expect(result.status).toBe('completed');
+    });
+
+    it('fails when fallback also fails', async () => {
+      mockChat = vi.fn()
+        .mockRejectedValueOnce(new Error('primary failed'))
+        .mockRejectedValueOnce(new Error('fallback also failed'));
+
+      const fbExecutor = new WorkflowExecutor('ws://localhost:19789');
+
+      const workflow = makeWorkflow([
+        {
+          id: 'double-fail',
+          action: 'primary-act',
+          realm: 'r',
+          on_failure: 'fallback',
+          fallback_action: 'backup-act',
+        },
+      ]);
+
+      const result = await fbExecutor.run(workflow, {});
+
+      const step = result.steps.get('double-fail');
+      expect(step?.status).toBe('failed');
+      expect(step?.error).toContain('Fallback also failed');
+      expect(result.status).toBe('failed');
     });
   });
 

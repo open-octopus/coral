@@ -23,6 +23,9 @@ export interface RetryConfig {
   delay: number;
 }
 
+/** Failure handling strategy for a step. */
+export type FailureStrategy = 'fail' | 'skip' | 'fallback';
+
 /** Definition of a single step within a workflow. */
 export interface StepDefinition {
   id: string;
@@ -33,6 +36,8 @@ export interface StepDefinition {
   approval?: ApprovalMode;
   timeout?: number;
   retry?: RetryConfig;
+  on_failure?: FailureStrategy;
+  fallback_action?: string;
 }
 
 /** Complete workflow definition, typically parsed from YAML. */
@@ -81,6 +86,10 @@ export type WorkflowEvent =
 export type DAG = Map<string, string[]>;
 
 // ── Type Guards ───────────────────────────────────────────────────────
+
+export function isFailureStrategy(value: unknown): value is FailureStrategy {
+  return value === 'fail' || value === 'skip' || value === 'fallback';
+}
 
 export function isApprovalMode(value: unknown): value is ApprovalMode {
   return value === 'required' || value === 'optional';
