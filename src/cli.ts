@@ -21,6 +21,42 @@ import type { WorkflowEvent } from './types.js';
 const DEFAULT_GATEWAY_URL = 'ws://localhost:19789';
 const WORKFLOWS_DIR = resolve(process.cwd(), 'workflows');
 
+/**
+ * Attach the standard event logger to a workflow executor.
+ * Logs step lifecycle events (start, done, failed, skipped, waiting_approval).
+ */
+function attachEventLogger(executor: WorkflowExecutor): void {
+  executor.on('event', (event: WorkflowEvent) => {
+    switch (event.type) {
+      case 'step:start':
+        consola.info(
+          `Step ${event.stepId.padEnd(20)} ... running${event.step.realm ? ` (${event.step.realm} Realm)` : ''}`,
+        );
+        break;
+      case 'step:done':
+        consola.success(
+          `Step ${event.stepId.padEnd(20)} ... done`,
+        );
+        break;
+      case 'step:failed':
+        consola.error(
+          `Step ${event.stepId.padEnd(20)} ... failed — ${event.result.error}`,
+        );
+        break;
+      case 'step:skipped':
+        consola.warn(
+          `Step ${event.stepId.padEnd(20)} ... skipped — ${event.reason}`,
+        );
+        break;
+      case 'step:waiting_approval':
+        consola.warn(
+          `Step ${event.stepId.padEnd(20)} ... waiting for approval`,
+        );
+        break;
+    }
+  });
+}
+
 // ── run command ───────────────────────────────────────────────────────
 
 const runCommand = defineCommand({
@@ -83,35 +119,7 @@ const runCommand = defineCommand({
 
       const executor = new WorkflowExecutor(args.gateway as string);
 
-      executor.on('event', (event: WorkflowEvent) => {
-        switch (event.type) {
-          case 'step:start':
-            consola.info(
-              `Step ${event.stepId.padEnd(20)} ... running${event.step.realm ? ` (${event.step.realm} Realm)` : ''}`,
-            );
-            break;
-          case 'step:done':
-            consola.success(
-              `Step ${event.stepId.padEnd(20)} ... done`,
-            );
-            break;
-          case 'step:failed':
-            consola.error(
-              `Step ${event.stepId.padEnd(20)} ... failed — ${event.result.error}`,
-            );
-            break;
-          case 'step:skipped':
-            consola.warn(
-              `Step ${event.stepId.padEnd(20)} ... skipped — ${event.reason}`,
-            );
-            break;
-          case 'step:waiting_approval':
-            consola.warn(
-              `Step ${event.stepId.padEnd(20)} ... waiting for approval`,
-            );
-            break;
-        }
-      });
+      attachEventLogger(executor);
 
       const noInteractive = args['no-interactive'] as boolean;
 
@@ -291,25 +299,7 @@ const resumeCommand = defineCommand({
 
       const executor = new WorkflowExecutor(args.gateway as string);
 
-      executor.on('event', (event: WorkflowEvent) => {
-        switch (event.type) {
-          case 'step:start':
-            consola.info(`Step ${event.stepId.padEnd(20)} ... running${event.step.realm ? ` (${event.step.realm} Realm)` : ''}`);
-            break;
-          case 'step:done':
-            consola.success(`Step ${event.stepId.padEnd(20)} ... done`);
-            break;
-          case 'step:failed':
-            consola.error(`Step ${event.stepId.padEnd(20)} ... failed — ${event.result.error}`);
-            break;
-          case 'step:skipped':
-            consola.warn(`Step ${event.stepId.padEnd(20)} ... skipped — ${event.reason}`);
-            break;
-          case 'step:waiting_approval':
-            consola.warn(`Step ${event.stepId.padEnd(20)} ... waiting for approval`);
-            break;
-        }
-      });
+      attachEventLogger(executor);
 
       const approveList = args.approve ? (args.approve as string).split(',').map((s) => s.trim()) : [];
       const rejectList = args.reject ? (args.reject as string).split(',').map((s) => s.trim()) : [];

@@ -29,12 +29,6 @@ export function topologicalSort(dag: DAG): string[] {
   for (const [node] of dag) {
     inDegree.set(node, 0);
   }
-  for (const [, deps] of dag) {
-    for (const dep of deps) {
-      // dep is a dependency, meaning there is an edge dep -> node
-      // But we track in-degree of the node that has the dependency
-    }
-  }
 
   // Build forward adjacency: for each dep -> list of nodes that depend on it
   const forward = new Map<string, string[]>();

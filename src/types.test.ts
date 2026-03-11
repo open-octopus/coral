@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import {
   isApprovalMode,
+  isFailureStrategy,
   isStepStatus,
   isWorkflowStatus,
   createStepResult,
@@ -39,6 +40,27 @@ describe('type guards', () => {
       expect(isStepStatus('cancelled')).toBe(false);
       expect(isStepStatus('')).toBe(false);
       expect(isStepStatus(0)).toBe(false);
+    });
+  });
+
+  describe('isFailureStrategy', () => {
+    it('returns true for "fail"', () => {
+      expect(isFailureStrategy('fail')).toBe(true);
+    });
+
+    it('returns true for "skip"', () => {
+      expect(isFailureStrategy('skip')).toBe(true);
+    });
+
+    it('returns true for "fallback"', () => {
+      expect(isFailureStrategy('fallback')).toBe(true);
+    });
+
+    it('returns false for invalid values', () => {
+      expect(isFailureStrategy('retry')).toBe(false);
+      expect(isFailureStrategy(null)).toBe(false);
+      expect(isFailureStrategy(undefined)).toBe(false);
+      expect(isFailureStrategy(42)).toBe(false);
     });
   });
 
