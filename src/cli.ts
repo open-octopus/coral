@@ -13,7 +13,7 @@ import { defineCommand, runMain } from 'citty';
 import consola from 'consola';
 import { readdir } from 'node:fs/promises';
 import { resolve, extname, basename } from 'node:path';
-import { parseWorkflowFile, parseWorkflowString, WorkflowParseError } from './parser.js';
+import { parseWorkflowFile, WorkflowParseError } from './parser.js';
 import { WorkflowExecutor } from './executor.js';
 import { RunStore } from './run-store.js';
 import type { WorkflowEvent } from './types.js';
