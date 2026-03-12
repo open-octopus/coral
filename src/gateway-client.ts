@@ -65,8 +65,8 @@ export class GatewayClient {
         try {
           const msg = JSON.parse(data.toString()) as RPCMessage;
           this.handleMessage(msg);
-        } catch {
-          // Ignore malformed messages
+        } catch (err) {
+          console.warn('[gateway] Malformed message:', err instanceof Error ? err.message : String(err));
         }
       });
 

@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { WebSocketServer } from 'ws';
 import { GatewayClient } from './gateway-client.js';
 
@@ -152,5 +152,26 @@ describe('GatewayClient', () => {
       entity: 'bot',
     });
     expect(result).toBe('Complete response from server');
+  });
+
+  it('logs warning for malformed messages', async () => {
+    const spy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+
+    wss.on('connection', (ws) => {
+      // Send invalid JSON
+      ws.send('not-json{{{');
+    });
+
+    await client.connect();
+
+    // Give the message time to arrive
+    await new Promise((r) => setTimeout(r, 50));
+
+    expect(spy).toHaveBeenCalledWith(
+      '[gateway] Malformed message:',
+      expect.stringContaining(''),
+    );
+
+    spy.mockRestore();
   });
 });
