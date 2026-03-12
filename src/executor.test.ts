@@ -13,13 +13,15 @@ let mockCall = vi.fn().mockResolvedValue({ result: 'mocked utility response' });
 // Mock the gateway client so tests don't need a real WebSocket server
 vi.mock('./gateway-client.js', () => {
   return {
-    GatewayClient: vi.fn().mockImplementation(() => ({
-      connect: vi.fn().mockResolvedValue(undefined),
-      disconnect: vi.fn(),
-      get chat() { return mockChat; },
-      get call() { return mockCall; },
-      connected: true,
-    })),
+    GatewayClient: vi.fn().mockImplementation(function () {
+      return {
+        connect: vi.fn().mockResolvedValue(undefined),
+        disconnect: vi.fn(),
+        get chat() { return mockChat; },
+        get call() { return mockCall; },
+        connected: true,
+      };
+    }),
   };
 });
 
