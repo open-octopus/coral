@@ -8,7 +8,7 @@
 <h3 align="center">coral</h3>
 
 <p align="center">
-  Cross-realm workflow engine — orchestrate multi-domain automation pipelines.
+  Family event routing engine — same event, every member, the right context.
 </p>
 
 <p align="center">
@@ -25,11 +25,54 @@
 
 ## What is coral?
 
-**coral** is the cross-realm workflow engine for [OpenOctopus](https://github.com/open-octopus/openoctopus). While each Realm operates autonomously, real life often requires coordination across domains. coral provides DAG-based (Directed Acyclic Graph) orchestration for multi-realm automation pipelines.
+**coral** is the family event routing engine for [OpenOctopus](https://github.com/open-octopus/openoctopus). It powers the core differentiator: **one event triggers intelligent, role-aware responses across realms and family members**. coral provides DAG-based (Directed Acyclic Graph) orchestration for cross-realm coordination with family-aware routing.
 
-Named after the coral structures that connect and support diverse life in a reef, coral connects your Realms into coordinated workflows.
+Named after the coral structures that connect and support diverse life in a reef, coral connects your Realms into coordinated workflows — and routes outputs to the right family member with the right context.
 
-## Example: Travel Preparation
+## The Killer Scenario: Grandpa's Knee
+
+When grandpa mentions *"My knee hurts again"* in the family group chat, coral routes intelligently:
+
+```
+┌──────────────────────────────────────────────────────┐
+│         Trigger: "Grandpa says his knee hurts"        │
+└──────────────────────┬───────────────────────────────┘
+                       │
+          ┌────────────┼────────────┐
+          ▼            ▼            ▼
+   ┌────────────┐ ┌─────────┐ ┌──────────┐
+   │ Health     │ │ Finance │ │ Parents  │
+   │ Realm      │ │ Realm   │ │ Realm    │
+   │            │ │         │ │          │
+   │ Medical    │ │ Insurance│ │ Family   │
+   │ history +  │ │ balance +│ │ schedule │
+   │ available  │ │ coverage │ │ check    │
+   │ doctors    │ │ status   │ │          │
+   └─────┬──────┘ └────┬────┘ └────┬─────┘
+         │              │           │
+         └──────────────┼───────────┘
+                        ▼
+              ┌──────────────────┐
+              │ Role-Aware       │
+              │ Routing          │
+              └────────┬─────────┘
+          ┌────────────┼────────────┐
+          ▼            ▼            ▼
+   ┌────────────┐ ┌─────────┐ ┌──────────┐
+   │ → Dad      │ │ → Mom   │ │ → Daughter│
+   │            │ │         │ │          │
+   │ "Schedule  │ │ "Buy    │ │ (not     │
+   │  checkup?" │ │ pain    │ │ disturbed)│
+   │ + history  │ │ relief?"│ │          │
+   │ + slots    │ │ + supply│ │          │
+   └────────────┘ └─────────┘ └──────────┘
+```
+
+**3 seconds.** Same event, 3 different family members, 3 different versions — each with the context they need.
+
+## More Examples
+
+### Travel Preparation
 
 When you say *"I'm traveling to Tokyo next week for 5 days"*, coral orchestrates across multiple Realms:
 
