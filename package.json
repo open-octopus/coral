@@ -1,6 +1,7 @@
 {
   "name": "coral",
   "version": "0.1.0",
+  "packageManager": "pnpm@10.30.2",
   "description": "Cross-realm workflow engine — orchestrate multi-domain automation pipelines for OpenOctopus.",
   "type": "module",
   "main": "dist/index.js",
